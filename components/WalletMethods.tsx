@@ -1,9 +1,9 @@
-import { useConnect } from 'wagmi';
+import { useConnect, type Connector } from 'wagmi';
 import { useIsMounted } from '../hooks/useIsMounted';
 import Image from 'next/image';
 
 interface WalletMethodsProps {
-  authWithEthWallet: (connector: any) => Promise<void>;
+  authWithEthWallet: (connector: Connector) => Promise<void>;
   setView: React.Dispatch<React.SetStateAction<string>>;
 }
 
@@ -27,7 +27,7 @@ const WalletMethods = ({ authWithEthWallet, setView }: WalletMethodsProps) => {
             className="btn btn--outline"
             disabled={!connector.ready}
             key={connector.id}
-            onClick={() => authWithEthWallet({ connector })}
+            onClick={() => authWithEthWallet(connector)}
           >
             {connector.name.toLowerCase() === 'metamask' && (
               <div className="btn__icon">

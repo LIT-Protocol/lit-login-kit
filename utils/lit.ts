@@ -9,8 +9,8 @@ import {
 } from '@lit-protocol/lit-auth-client';
 import { LitNodeClient } from '@lit-protocol/lit-node-client';
 import {
-  AuthMethodScope,
-  AuthMethodType,
+  AUTH_METHOD_SCOPE,
+  AUTH_METHOD_TYPE,
   LIT_ABILITY,
   LIT_NETWORK,
 } from '@lit-protocol/constants';
@@ -20,6 +20,7 @@ import {
   IRelayPKP,
   SessionSigs,
   LIT_NETWORKS_KEYS,
+  IRelayPollStatusResponse,
 } from '@lit-protocol/types';
 import { LitPKPResource } from '@lit-protocol/auth-helpers';
 
@@ -61,12 +62,12 @@ let stytchSmsOtpProvider: StytchAuthFactorOtpProvider<'sms'>;
  */
 function getAuthenticatedProvider(authMethod: AuthMethod): BaseProvider {
   const providers = {
-    [AuthMethodType.GoogleJwt]: googleProvider,
-    [AuthMethodType.Discord]: discordProvider,
-    [AuthMethodType.EthWallet]: ethWalletProvider,
-    [AuthMethodType.WebAuthn]: webAuthnProvider,
-    [AuthMethodType.StytchEmailFactorOtp]: stytchEmailOtpProvider,
-    [AuthMethodType.StytchSmsFactorOtp]: stytchSmsOtpProvider,
+    [AUTH_METHOD_TYPE.GoogleJwt]: googleProvider,
+    [AUTH_METHOD_TYPE.Discord]: discordProvider,
+    [AUTH_METHOD_TYPE.EthWallet]: ethWalletProvider,
+    [AUTH_METHOD_TYPE.WebAuthn]: webAuthnProvider,
+    [AUTH_METHOD_TYPE.StytchEmailFactorOtp]: stytchEmailOtpProvider,
+    [AUTH_METHOD_TYPE.StytchSmsFactorOtp]: stytchSmsOtpProvider,
   };
 
   return providers[authMethod.authMethodType];
@@ -117,13 +118,16 @@ function getWebAuthnProvider() {
   return webAuthnProvider;
 }
 function getStytchEmailOtpProvider() {
+  if (!process.env.NEXT_PUBLIC_STYTCH_PROJECT_ID) {
+    throw new Error('Stytch project ID is not set');
+  }
   if (!stytchEmailOtpProvider) {
     stytchEmailOtpProvider = new StytchAuthFactorOtpProvider<'email'>(
       {
         relay: litRelay,
         litNodeClient,
       },
-      { appId: process.env.NEXT_PUBLIC_STYTCH_PROJECT_ID },
+      { appId: process.env.NEXT_PUBLIC_STYTCH_PROJECT_ID},
       'email',
     );
   }
@@ -137,7 +141,7 @@ function getStytchSmsOtpProvider() {
         relay: litRelay,
         litNodeClient,
       },
-      { appId: process.env.NEXT_PUBLIC_STYTCH_PROJECT_ID },
+      { appId: process.env.NEXT_PUBLIC_STYTCH_PROJECT_ID || '' },
       'sms',
     );
   }
@@ -195,14 +199,15 @@ export async function authenticateWithDiscord(
  * Get auth method object by signing a message with an Ethereum wallet
  */
 export async function authenticateWithEthWallet(
-  address?: string,
-  signMessage?: (message: string) => Promise<string>
+  address: string,
+  signMessage: (message: string) => Promise<string>
 ): Promise<AuthMethod> {
   const ethWalletProvider = getEthWalletProvider();
-  return await ethWalletProvider.authenticate({
+  const authMethod = await ethWalletProvider.authenticate({
     address,
     signMessage,
   });
+  return authMethod;
 }
 
 /**
@@ -217,6 +222,9 @@ export async function registerWebAuthn(): Promise<IRelayPKP> {
   const txHash = await webAuthnProvider.verifyAndMintPKPThroughRelayer(options);
   const response = await webAuthnProvider.relay.pollRequestUntilTerminalState(txHash);
   if (response.status !== 'Succeeded') {
+    throw new Error('Minting failed');
+  }
+  if (!response.pkpTokenId || !response.pkpPublicKey || !response.pkpEthAddress) {
     throw new Error('Minting failed');
   }
   const newPKP: IRelayPKP = {
@@ -299,12 +307,12 @@ export async function mintPKP(authMethod: AuthMethod): Promise<IRelayPKP> {
   const provider = getAuthenticatedProvider(authMethod);
   // Set scope of signing any data
   const options = {
-    permittedAuthMethodScopes: [[AuthMethodScope.SignAnything]],
+    permittedAuthMethodScopes: [[AUTH_METHOD_SCOPE.SignAnything]],
   };
 
   let txHash: string;
 
-  if (authMethod.authMethodType === AuthMethodType.WebAuthn) {
+  if (authMethod.authMethodType === AUTH_METHOD_TYPE.WebAuthn) {
     // WebAuthn provider requires different steps
     const webAuthnProvider = provider as WebAuthnProvider;
     // Register new WebAuthn credential
@@ -318,7 +326,7 @@ export async function mintPKP(authMethod: AuthMethod): Promise<IRelayPKP> {
   }
 
   let attempts = 3;
-  let response = null;
+  let response: IRelayPollStatusResponse | null = null;
 
   while (attempts > 0) {
     try {
@@ -334,6 +342,10 @@ export async function mintPKP(authMethod: AuthMethod): Promise<IRelayPKP> {
   }
 
   if (!response || response.status !== 'Succeeded') {
+    throw new Error('Minting failed');
+  }
+
+  if (!response.pkpTokenId || !response.pkpPublicKey || !response.pkpEthAddress) {
     throw new Error('Minting failed');
   }
 

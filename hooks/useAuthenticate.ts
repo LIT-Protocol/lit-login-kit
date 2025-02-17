@@ -74,6 +74,12 @@ export default function useAuthenticate(redirectUri?: string) {
       setAuthMethod(undefined);
 
       try {
+        // First connect using the connector
+        await connectAsync({ connector });
+        
+        if (!address) {
+          throw new Error('No account connected');
+        }
         
         const signMessage = async (message: string) => {
           return await signMessageAsync({ message });
@@ -90,7 +96,7 @@ export default function useAuthenticate(redirectUri?: string) {
         setLoading(false);
       }
     },
-    [connectAsync, signMessageAsync]
+    [connectAsync, signMessageAsync, address]
   );
 
   /**
