@@ -1,14 +1,15 @@
+"use client";
 import { useEffect } from 'react';
-import { useRouter } from 'next/router';
-import useAuthenticate from '../hooks/useAuthenticate';
-import useSession from '../hooks/useSession';
-import useAccounts from '../hooks/useAccounts';
-import { ORIGIN, signInWithDiscord, signInWithGoogle } from '../utils/lit';
-import Dashboard from '../components/Dashboard';
-import Loading from '../components/Loading';
-import LoginMethods from '../components/LoginMethods';
-import AccountSelection from '../components/AccountSelection';
-import CreateAccount from '../components/CreateAccount';
+import { useRouter } from 'next/navigation';
+import useAuthenticate from '../../hooks/useAuthenticate';
+import useSession from '../../hooks/useSession';
+import useAccounts from '../../hooks/useAccounts';
+import { ORIGIN, signInWithDiscord, signInWithGoogle } from '../../utils/lit';
+import Dashboard from '../../components/Dashboard';
+import Loading from '../../components/Loading';
+import LoginMethods from '../../components/LoginMethods';
+import AccountSelection from '../../components/AccountSelection';
+import CreateAccount from '../../components/CreateAccount';
 
 export default function LoginView() {
   const redirectUri = ORIGIN + '/login';
@@ -54,7 +55,7 @@ export default function LoginView() {
   useEffect(() => {
     // If user is authenticated, fetch accounts
     if (authMethod) {
-      router.replace(window.location.pathname, undefined, { shallow: true });
+      router.replace(window.location.pathname);
       fetchAccounts(authMethod);
     }
   }, [authMethod, fetchAccounts]);

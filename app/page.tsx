@@ -1,5 +1,6 @@
+"use client";
 import { useEffect } from 'react';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import useAuthenticate from '../hooks/useAuthenticate';
 import useSession from '../hooks/useSession';
 import useAccounts from '../hooks/useAccounts';
@@ -9,7 +10,7 @@ import {
   signInWithDiscord,
   signInWithGoogle,
 } from '../utils/lit';
-import { AuthMethodType } from '@lit-protocol/constants';
+import { AUTH_METHOD_TYPE } from '@lit-protocol/constants';
 import SignUpMethods from '../components/SignUpMethods';
 import Dashboard from '../components/Dashboard';
 import Loading from '../components/Loading';
@@ -74,8 +75,8 @@ export default function SignUpView() {
   useEffect(() => {
     // If user is authenticated, create an account
     // For WebAuthn, the account creation is handled by the registerWithWebAuthn function
-    if (authMethod && authMethod.authMethodType !== AuthMethodType.WebAuthn) {
-      router.replace(window.location.pathname, undefined, { shallow: true });
+    if (authMethod && authMethod.authMethodType !== AUTH_METHOD_TYPE.WebAuthn) {
+      router.replace(window.location.pathname);
       createAccount(authMethod);
     }
   }, [authMethod, createAccount]);

@@ -2,7 +2,7 @@ import { IRelayPKP, SessionSigs } from '@lit-protocol/types';
 import { ethers } from 'ethers';
 import { useState } from 'react';
 import { PKPEthersWallet } from '@lit-protocol/pkp-ethers';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { useDisconnect } from 'wagmi';
 import { litNodeClient } from '../utils/lit';
 
@@ -66,7 +66,7 @@ export default function Dashboard({
       await disconnectAsync();
     } catch (err) { }
     localStorage.removeItem('lit-wallet-sig');
-    router.reload();
+    router.refresh();
   }
 
   return (

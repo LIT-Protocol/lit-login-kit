@@ -7,9 +7,9 @@ This is an example web app that shows how you can mint and use Lit's programmabl
 1. Clone this repo and install dependencies:
 
 ```bash
-git clone git@github.com:LIT-Protocol/pkp-social-auth-example.git
+git clone https://github.com/LIT-Protocol/lit-pkp-auth-demo.git
 
-cd pkp-social-auth-example
+cd lit-pkp-auth-demo
 
 npm install
 ```

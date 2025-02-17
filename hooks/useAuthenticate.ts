@@ -11,19 +11,18 @@ import {
   authenticateWithWebAuthn,
   authenticateWithStytch,
 } from '../utils/lit';
-import { useConnect } from 'wagmi';
+import { useConnect, useSignMessage, useAccount } from 'wagmi';
+import { config } from '../app/layout';
 
 export default function useAuthenticate(redirectUri?: string) {
   const [authMethod, setAuthMethod] = useState<AuthMethod>();
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error>();
 
-  // wagmi hook
-  const { connectAsync } = useConnect({
-    onError: (err: unknown) => {
-      setError(err as Error);
-    },
-  });
+  // wagmi hooks
+  const { connectAsync } = useConnect();
+  const { signMessageAsync } = useSignMessage();
+  const { address } = useAccount();
 
   /**
    * Handle redirect from Google OAuth
@@ -75,16 +74,13 @@ export default function useAuthenticate(redirectUri?: string) {
       setAuthMethod(undefined);
 
       try {
-        const { account, connector: activeConnector } = await connectAsync(
-          connector
-        );
-        const signer = await activeConnector.getSigner();
+        
         const signMessage = async (message: string) => {
-          const sig = await signer.signMessage(message);
-          return sig;
+          return await signMessageAsync({ message });
         };
+
         const result: AuthMethod = await authenticateWithEthWallet(
-          account,
+          address,
           signMessage
         );
         setAuthMethod(result);
@@ -94,7 +90,7 @@ export default function useAuthenticate(redirectUri?: string) {
         setLoading(false);
       }
     },
-    [connectAsync]
+    [connectAsync, signMessageAsync]
   );
 
   /**
