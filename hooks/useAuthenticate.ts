@@ -12,7 +12,7 @@ import {
   authenticateWithStytch,
 } from '../utils/lit';
 import { useConnect, useSignMessage, useAccount } from 'wagmi';
-import { config } from '../app/layout';
+import { config } from '../app/lib/wagmi';
 
 export default function useAuthenticate(redirectUri?: string) {
   const [authMethod, setAuthMethod] = useState<AuthMethod>();
