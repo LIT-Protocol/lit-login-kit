@@ -64,6 +64,8 @@ export default function Dashboard({
   async function handleLogout() {
     try {
       await disconnectAsync();
+      router.push('/');
+      router.refresh();
     } catch (err) { }
     localStorage.removeItem('lit-wallet-sig');
     router.refresh();
