@@ -1,20 +1,34 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { AuthMethod } from '@lit-protocol/types';
 import { getPKPs, mintPKP } from '../utils/lit';
 import { IRelayPKP } from '@lit-protocol/types';
 import { verify } from 'crypto';
 
-export default function useAccounts() {
+type FlowType = 'login' | 'signup';
+
+export default function useAccounts(flow: FlowType = 'login') {
   const [accounts, setAccounts] = useState<IRelayPKP[]>([]);
   const [currentAccount, setCurrentAccount] = useState<IRelayPKP>();
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error>();
+
+  // Reset state when flow changes
+  useEffect(() => {
+    setAccounts([]);
+    setCurrentAccount(undefined);
+    setError(undefined);
+  }, [flow]);
 
   /**
    * Fetch PKPs tied to given auth method
    */
   const fetchAccounts = useCallback(
     async (authMethod: AuthMethod): Promise<void> => {
+      // Don't fetch accounts in signup flow
+      if (flow === 'signup') {
+        return;
+      }
+
       setLoading(true);
       setError(undefined);
       try {
@@ -32,7 +46,7 @@ export default function useAccounts() {
         setLoading(false);
       }
     },
-    []
+    [flow]
   );
 
   /**
@@ -65,5 +79,6 @@ export default function useAccounts() {
     currentAccount,
     loading,
     error,
+    flow,
   };
 }

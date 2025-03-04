@@ -22,11 +22,13 @@ import AuthMethods from './AuthMethods';
 import { useIsMounted } from '../hooks/useIsMounted';
 
 export default function AuthModal() {
+  const [view, setView] = useState<'login' | 'signup'>('login');
+  const isMounted = useIsMounted();
+
   // ---------- Login View ----------
 
-  function LoginView() {
+  function LoginView({ onSignUpClick }: { onSignUpClick: () => void }) {
     const redirectUri = ORIGIN;
-    const isMounted = useIsMounted();
 
     const {
       authMethod,
@@ -43,7 +45,8 @@ export default function AuthModal() {
       accounts,
       loading: accountsLoading,
       error: accountsError,
-    } = useAccounts();
+      flow,
+    } = useAccounts('login');
     const {
       initSession,
       sessionSigs,
@@ -63,7 +66,7 @@ export default function AuthModal() {
     }
 
     function goToSignUp() {
-      router.push('/');
+      onSignUpClick();
     }
 
     useEffect(() => {
@@ -131,11 +134,95 @@ export default function AuthModal() {
     );
   }
 
+  // ---------- Login Methods ----------
+
+  interface LoginProps {
+    handleGoogleLogin: () => Promise<void>;
+    handleDiscordLogin: () => Promise<void>;
+    authWithEthWallet: any;
+    authWithWebAuthn: any;
+    authWithStytch: any;
+    signUp: any;
+    error?: Error;
+  }
+
+  type AuthView = 'default' | 'email' | 'phone' | 'wallet' | 'webauthn';
+
+  function LoginMethods({
+    handleGoogleLogin,
+    handleDiscordLogin,
+    authWithEthWallet,
+    authWithWebAuthn,
+    authWithStytch,
+    signUp,
+    error,
+  }: LoginProps) {
+    const [view, setView] = useState<AuthView>('default');
+
+    return (
+      <div className="container">
+        <div className="wrapper">
+          {error && (
+            <div className="alert alert--error">
+              <p>{error.message}</p>
+            </div>
+          )}
+          {view === 'default' && (
+            <>
+              <h1>Login to your existing account</h1>
+              <p>Access your Lit wallet.</p>
+              <AuthMethods
+                handleGoogleLogin={handleGoogleLogin}
+                handleDiscordLogin={handleDiscordLogin}
+                setView={setView}
+              />
+              <div className="buttons-container">
+                <button
+                  type="button"
+                  className="btn btn--link"
+                  onClick={signUp}
+                >
+                  Need an account? Sign up
+                </button>
+              </div>
+            </>
+          )}
+          {view === 'email' && (
+            <StytchOTP
+              method={'email'}
+              authWithStytch={authWithStytch}
+              setView={setView}
+            />
+          )}
+          {view === 'phone' && (
+            <StytchOTP
+              method={'phone'}
+              authWithStytch={authWithStytch}
+              setView={setView}
+            />
+          )}
+          {view === 'wallet' && (
+            <WalletMethods
+              authWithEthWallet={authWithEthWallet}
+              setView={setView}
+            />
+          )}
+          {view === 'webauthn' && (
+            <WebAuthn
+              start={'authenticate'}
+              authWithWebAuthn={authWithWebAuthn}
+              setView={setView}
+            />
+          )}
+        </div>
+      </div>
+    );
+  }
+
   // ---------- Sign Up Methods ----------
 
-  function SignUpView() {
+  function SignUpView({ onLoginClick }: { onLoginClick: () => void }) {
     const redirectUri = ORIGIN;
-    const isMounted = useIsMounted();
 
     const {
       authMethod,
@@ -151,7 +238,8 @@ export default function AuthModal() {
       currentAccount,
       loading: accountsLoading,
       error: accountsError,
-    } = useAccounts();
+      flow,
+    } = useAccounts('signup');
     const {
       initSession,
       sessionSigs,
@@ -228,104 +316,46 @@ export default function AuthModal() {
       return (
         <Dashboard currentAccount={currentAccount} sessionSigs={sessionSigs} />
       );
-    } else {
+    }
+
+    // If user is authenticated, show create account
+    if (authMethod) {
       return (
-        <SignUpMethods
-          handleGoogleLogin={handleGoogleLogin}
-          handleDiscordLogin={handleDiscordLogin}
-          authWithEthWallet={authWithEthWallet}
-          registerWithWebAuthn={registerWithWebAuthn}
-          authWithWebAuthn={authWithWebAuthn}
-          authWithStytch={authWithStytch}
-          goToLogin={() => router.push('/login')}
-          error={error}
-        />
+        <div className="container">
+          <div className="wrapper">
+            {error && (
+              <div className="alert alert--error">
+                <p>{error.message}</p>
+              </div>
+            )}
+            <h1>Create your account</h1>
+            <p>Set up your Lit wallet to get started.</p>
+            <div className="buttons-container">
+              <button
+                type="button"
+                className="btn btn--primary"
+                onClick={() => createAccount(authMethod)}
+              >
+                Create Account
+              </button>
+            </div>
+          </div>
+        </div>
       );
     }
-  }
 
-  // ---------- Login Methods ----------
-
-  interface LoginProps {
-    handleGoogleLogin: () => Promise<void>;
-    handleDiscordLogin: () => Promise<void>;
-    authWithEthWallet: any;
-    authWithWebAuthn: any;
-    authWithStytch: any;
-    signUp: any;
-    error?: Error;
-  }
-
-  type AuthView = 'default' | 'email' | 'phone' | 'wallet' | 'webauthn';
-
-  function LoginMethods({
-    handleGoogleLogin,
-    handleDiscordLogin,
-    authWithEthWallet,
-    authWithWebAuthn,
-    authWithStytch,
-    signUp,
-    error,
-  }: LoginProps) {
-    const [view, setView] = useState<AuthView>('default');
-
+    // If user is not authenticated, show signup methods
     return (
-      <div className="container">
-        <div className="wrapper">
-          {error && (
-            <div className="alert alert--error">
-              <p>{error.message}</p>
-            </div>
-          )}
-          {view === 'default' && (
-            <>
-              <h1>Welcome back</h1>
-              <p>Access your Lit wallet.</p>
-              <AuthMethods
-                handleGoogleLogin={handleGoogleLogin}
-                handleDiscordLogin={handleDiscordLogin}
-                setView={setView}
-              />
-              <div className="buttons-container">
-                <button
-                  type="button"
-                  className="btn btn--link"
-                  onClick={signUp}
-                >
-                  Need an account? Sign up
-                </button>
-              </div>
-            </>
-          )}
-          {view === 'email' && (
-            <StytchOTP
-              method={'email'}
-              authWithStytch={authWithStytch}
-              setView={setView}
-            />
-          )}
-          {view === 'phone' && (
-            <StytchOTP
-              method={'phone'}
-              authWithStytch={authWithStytch}
-              setView={setView}
-            />
-          )}
-          {view === 'wallet' && (
-            <WalletMethods
-              authWithEthWallet={authWithEthWallet}
-              setView={setView}
-            />
-          )}
-          {view === 'webauthn' && (
-            <WebAuthn
-              start={'authenticate'}
-              authWithWebAuthn={authWithWebAuthn}
-              setView={setView}
-            />
-          )}
-        </div>
-      </div>
+      <SignUpMethods
+        handleGoogleLogin={handleGoogleLogin}
+        handleDiscordLogin={handleDiscordLogin}
+        authWithEthWallet={authWithEthWallet}
+        registerWithWebAuthn={registerWithWebAuthn}
+        authWithWebAuthn={authWithWebAuthn}
+        authWithStytch={authWithStytch}
+        goToLogin={onLoginClick}
+        error={error}
+      />
     );
   }
 
@@ -364,11 +394,10 @@ export default function AuthModal() {
           )}
           {view === 'default' && (
             <>
-              <h1>Get started on the {SELECTED_LIT_NETWORK} network</h1>
+              <h1>Create your account on the {SELECTED_LIT_NETWORK} network</h1>
               <p>
-                Create a wallet that is secured by accounts you already have.
-                With Lit-powered programmable MPC wallets, you won&apos;t have
-                to worry about seed phrases.
+                Create a wallet secured by accounts you already have. No need to
+                worry about seed phrases.
               </p>
               <AuthMethods
                 handleGoogleLogin={handleGoogleLogin}
@@ -422,8 +451,11 @@ export default function AuthModal() {
   return (
     <div className="container">
       <div className="wrapper">
-        {/* <SignUpView /> */}
-        <LoginView />
+        {view === 'login' ? (
+          <LoginView onSignUpClick={() => setView('signup')} />
+        ) : (
+          <SignUpView onLoginClick={() => setView('login')} />
+        )}
       </div>
     </div>
   );
