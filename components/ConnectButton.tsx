@@ -2,13 +2,14 @@ import { useEffect, useState } from 'react';
 import AuthModal from './AuthModal';
 import useSession from '../hooks/useSession';
 import useAccounts from '../hooks/useAccounts';
-import '../styles/auth-modal.css';
+import '../styles/lit-login-modal.css';
 import { useRouter } from 'next/navigation';
 import { useDisconnect } from 'wagmi';
 
 export default function ConnectButton() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [showLogout, setShowLogout] = useState(false);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
   const { clearSession } = useSession();
   const { currentAccount, setCurrentAccount } = useAccounts('login');
 
@@ -17,17 +18,17 @@ export default function ConnectButton() {
 
   useEffect(() => {
     console.log('connect button says currentAccount changed', currentAccount);
-    // When currentAccount changes, ensure modal is closed and logout dropdown is hidden
+    // When currentAccount changes, ensure modals are closed
     if (currentAccount) {
       setIsModalOpen(false);
-      setShowLogout(false);
+      setIsLogoutModalOpen(false);
     }
   }, [currentAccount]);
 
   const handleButtonClick = () => {
     if (currentAccount) {
-      // If logged in, toggle logout option
-      setShowLogout(!showLogout);
+      // If logged in, show logout modal
+      setIsLogoutModalOpen(true);
     } else {
       // If not logged in, show auth modal
       setIsModalOpen(true);
@@ -38,8 +39,17 @@ export default function ConnectButton() {
     clearSession();
     await disconnectAsync();
     setCurrentAccount(undefined);
-    setShowLogout(false);
+    setIsLogoutModalOpen(false);
     router.refresh();
+  };
+
+  const handleCopyAddress = () => {
+    if (currentAccount?.ethAddress) {
+      navigator.clipboard.writeText(currentAccount.ethAddress);
+      setIsCopied(true);
+      // Reset the copied state after 2 seconds
+      setTimeout(() => setIsCopied(false), 2000);
+    }
   };
 
   const truncateAddress = (address: string) => {
@@ -49,7 +59,7 @@ export default function ConnectButton() {
   return (
     <div className="connect-button-container">
       <button
-        className={`connect-button ${ currentAccount ? 'connect-button--connected' : ''}`}
+        className={`connect-button ${currentAccount ? 'connect-button--connected' : ''}`}
         onClick={handleButtonClick}
       >
         {currentAccount ? (
@@ -63,11 +73,29 @@ export default function ConnectButton() {
         )}
       </button>
 
-      {showLogout && (
-        <div className="logout-dropdown">
-          <button className="logout-button" onClick={handleLogout}>
-            Logout
-          </button>
+      {isLogoutModalOpen && (
+        <div className="modal-overlay" onClick={() => setIsLogoutModalOpen(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setIsLogoutModalOpen(false)}>
+              ×
+            </button>
+            <div className="logout-modal-content">
+              <h2>Account Details</h2>
+              <div className="address-container">
+                <span className="full-address">{currentAccount?.ethAddress}</span>
+                <button 
+                  className={`copy-button ${isCopied ? 'copy-button--copied' : ''}`} 
+                  onClick={handleCopyAddress}
+                  disabled={isCopied}
+                >
+                  {isCopied ? 'Copied!' : 'Copy'}
+                </button>
+              </div>
+              <button className="logout-button" onClick={handleLogout}>
+                Logout
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
