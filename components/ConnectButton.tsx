@@ -10,7 +10,7 @@ export default function ConnectButton() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showLogout, setShowLogout] = useState(false);
   const { clearSession } = useSession();
-  const { currentAccount } = useAccounts('login');
+  const { currentAccount, setCurrentAccount } = useAccounts('login');
 
   const { disconnectAsync } = useDisconnect();
   const router = useRouter();
@@ -37,9 +37,9 @@ export default function ConnectButton() {
   const handleLogout = async () => {
     clearSession();
     await disconnectAsync();
-    router.push('/');
-    router.refresh();
+    setCurrentAccount(undefined);
     setShowLogout(false);
+    router.refresh();
   };
 
   const truncateAddress = (address: string) => {

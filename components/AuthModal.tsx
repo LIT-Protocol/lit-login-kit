@@ -71,6 +71,13 @@ export default function AuthModal() {
       );
     }
 
+    // // If user is authenticated and has selected an account, show dash for creating session sig
+    // if (currentAccount && sessionSigs) {
+    //   return (
+    //     <Dashboard currentAccount={currentAccount} sessionSigs={sessionSigs} />
+    //   );
+    // }
+
     if (accountsLoading) {
       return <Loading copy={'Looking up your accounts...'} error={error} />;
     }
