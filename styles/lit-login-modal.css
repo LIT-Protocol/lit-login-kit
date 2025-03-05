@@ -62,7 +62,7 @@
 
 /* Connect Button Styles */
 .connect-button {
-  background: #4F46E5;
+  background: #1F2937;
   color: white;
   border: none;
   border-radius: 8px;
@@ -77,7 +77,7 @@
 }
 
 .connect-button:hover {
-  background: #4338CA;
+  background: #111827;
 }
 
 .connect-button:active {
@@ -167,7 +167,7 @@
 }
 
 .copy-button {
-  background: #4F46E5;
+  background: #1F2937;
   color: white;
   border: none;
   border-radius: 6px;
@@ -178,7 +178,7 @@
 }
 
 .copy-button:hover:not(:disabled) {
-  background: #4338CA;
+  background: #111827;
 }
 
 .copy-button:disabled {
@@ -186,11 +186,11 @@
 }
 
 .copy-button--copied {
-  background: #10B981;
+  background: #111827;
 }
 
 .logout-button {
-  background: #EF4444;
+  background: #1F2937;
   color: white;
   border: none;
   border-radius: 8px;
@@ -202,5 +202,5 @@
 }
 
 .logout-button:hover {
-  background: #DC2626;
+  background: #111827;
 } 
