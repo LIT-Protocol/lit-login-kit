@@ -75,13 +75,6 @@ export default function AuthModal() {
       return <Loading copy={'Looking up your accounts...'} error={error} />;
     }
 
-    // If user is authenticated and has selected an account, initialize session
-    if (currentAccount && authMethod) {
-      return (
-        <Dashboard currentAccount={currentAccount} authMethod={authMethod} />
-      );
-    }
-
     // If user is authenticated and has more than 1 account, show account selection
     if (authMethod && accounts.length > 0) {
       return (
@@ -268,9 +261,7 @@ export default function AuthModal() {
     }
 
     if (currentAccount && authMethod) {
-      return (
-        <Dashboard currentAccount={currentAccount} authMethod={authMethod} />
-      );
+      return null;
     }
 
     // If user is authenticated, show create account

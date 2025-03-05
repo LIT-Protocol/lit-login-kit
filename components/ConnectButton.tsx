@@ -1,17 +1,31 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import AuthModal from './AuthModal';
 import useSession from '../hooks/useSession';
 import useAccounts from '../hooks/useAccounts';
 import '../styles/auth-modal.css';
+import { useRouter } from 'next/navigation';
+import { useDisconnect } from 'wagmi';
 
 export default function ConnectButton() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showLogout, setShowLogout] = useState(false);
-  const { sessionSigs, clearSession } = useSession();
+  const { clearSession } = useSession();
   const { currentAccount } = useAccounts('login');
 
+  const { disconnectAsync } = useDisconnect();
+  const router = useRouter();
+
+  useEffect(() => {
+    console.log('connect button says currentAccount changed', currentAccount);
+    // When currentAccount changes, ensure modal is closed and logout dropdown is hidden
+    if (currentAccount) {
+      setIsModalOpen(false);
+      setShowLogout(false);
+    }
+  }, [currentAccount]);
+
   const handleButtonClick = () => {
-    if (sessionSigs) {
+    if (currentAccount) {
       // If logged in, toggle logout option
       setShowLogout(!showLogout);
     } else {
@@ -20,8 +34,11 @@ export default function ConnectButton() {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     clearSession();
+    await disconnectAsync();
+    router.push('/');
+    router.refresh();
     setShowLogout(false);
   };
 
@@ -32,13 +49,13 @@ export default function ConnectButton() {
   return (
     <div className="connect-button-container">
       <button
-        className={`connect-button ${sessionSigs ? 'connect-button--connected' : ''}`}
+        className={`connect-button ${ currentAccount ? 'connect-button--connected' : ''}`}
         onClick={handleButtonClick}
       >
-        {sessionSigs ? (
+        {currentAccount ? (
           <>
             <span className="address-text">
-              {currentAccount ? truncateAddress(currentAccount.ethAddress) : 'Connected'}
+              {truncateAddress(currentAccount.ethAddress)}
             </span>
           </>
         ) : (

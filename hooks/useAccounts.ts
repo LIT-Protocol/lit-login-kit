@@ -5,6 +5,15 @@ import { IRelayPKP } from '@lit-protocol/types';
 
 type FlowType = 'login' | 'signup';
 
+// Shared state at module level
+let sharedAccounts: IRelayPKP[] = [];
+let sharedCurrentAccount: IRelayPKP | undefined;
+let sharedLoading = false;
+let sharedError: Error | undefined;
+
+// Keep track of all state update listeners
+const listeners = new Set<(account: IRelayPKP | undefined) => void>();
+
 interface AccountHookReturn {
   fetchAccounts: (authMethod: AuthMethod) => Promise<void>;
   createAccount: (authMethod: AuthMethod) => Promise<void>;
@@ -17,17 +26,32 @@ interface AccountHookReturn {
 }
 
 export default function useAccounts(flow: FlowType = 'login'): AccountHookReturn {
-  const [accounts, setAccounts] = useState<IRelayPKP[]>([]);
-  const [currentAccount, setCurrentAccount] = useState<IRelayPKP>();
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<Error>();
+  const [accounts, setAccounts] = useState<IRelayPKP[]>(sharedAccounts);
+  const [currentAccount, setCurrentAccount] = useState<IRelayPKP | undefined>(sharedCurrentAccount);
+  const [loading, setLoading] = useState<boolean>(sharedLoading);
+  const [error, setError] = useState<Error | undefined>(sharedError);
 
   // Reset state when flow changes
   useEffect(() => {
+    sharedAccounts = [];
+    sharedCurrentAccount = undefined;
+    sharedError = undefined;
     setAccounts([]);
     setCurrentAccount(undefined);
     setError(undefined);
   }, [flow]);
+
+  // Add listener when component mounts
+  useEffect(() => {
+    const listener = (account: IRelayPKP | undefined) => {
+      setCurrentAccount(account);
+    };
+    listeners.add(listener);
+
+    return () => {
+      listeners.delete(listener);
+    };
+  }, []);
 
   /**
    * Fetch PKPs tied to given auth method
@@ -38,18 +62,26 @@ export default function useAccounts(flow: FlowType = 'login'): AccountHookReturn
         return;
       }
 
+      sharedLoading = true;
       setLoading(true);
+      sharedError = undefined;
       setError(undefined);
       try {
         const myPKPs = await getPKPs(authMethod);
+        sharedAccounts = myPKPs;
         setAccounts(myPKPs);
         if (myPKPs.length === 1) {
+          sharedCurrentAccount = myPKPs[0];
           setCurrentAccount(myPKPs[0]);
+          // Notify all listeners
+          listeners.forEach(listener => listener(myPKPs[0]));
         }
       } catch (err) {
         console.error('Error fetching accounts:', err);
-        setError(err instanceof Error ? err : new Error(String(err)));
+        sharedError = err as Error;
+        setError(err as Error);
       } finally {
+        sharedLoading = false;
         setLoading(false);
       }
     },
@@ -57,33 +89,62 @@ export default function useAccounts(flow: FlowType = 'login'): AccountHookReturn
   );
 
   /**
-   * Mint a new PKP for current auth method
+   * Create a new PKP for the given auth method
    */
   const createAccount = useCallback(
     async (authMethod: AuthMethod): Promise<void> => {
+      if (flow === 'login') {
+        return;
+      }
+
+      sharedLoading = true;
       setLoading(true);
+      sharedError = undefined;
       setError(undefined);
       try {
         const newPKP = await mintPKP(authMethod);
-        setAccounts(prev => {
-          const updated = [...prev, newPKP];
-          return updated;
-        });
+        sharedCurrentAccount = newPKP;
         setCurrentAccount(newPKP);
+        // Notify all listeners
+        listeners.forEach(listener => listener(newPKP));
       } catch (err) {
         console.error('Error creating account:', err);
-        setError(err instanceof Error ? err : new Error(String(err)));
+        sharedError = err as Error;
+        setError(err as Error);
       } finally {
+        sharedLoading = false;
         setLoading(false);
       }
     },
-    []
+    [flow]
   );
+
+  // Custom setCurrentAccount that updates both local and shared state
+  const customSetCurrentAccount = useCallback((newAccount: IRelayPKP | undefined | ((prev: IRelayPKP | undefined) => IRelayPKP | undefined)) => {
+    const resolvedAccount = typeof newAccount === 'function' ? newAccount(currentAccount) : newAccount;
+    sharedCurrentAccount = resolvedAccount;
+    setCurrentAccount(resolvedAccount);
+    // Notify all listeners
+    listeners.forEach(listener => listener(resolvedAccount));
+  }, [currentAccount]);
+
+  // Update shared state when local state changes
+  useEffect(() => {
+    sharedAccounts = accounts;
+  }, [accounts]);
+
+  useEffect(() => {
+    sharedError = error;
+  }, [error]);
+
+  useEffect(() => {
+    sharedLoading = loading;
+  }, [loading]);
 
   return {
     fetchAccounts,
     createAccount,
-    setCurrentAccount,
+    setCurrentAccount: customSetCurrentAccount,
     accounts,
     currentAccount,
     loading,
