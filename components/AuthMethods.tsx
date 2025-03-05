@@ -15,7 +15,7 @@ const AuthMethods = ({
     <>
       <div className="buttons-container">
         <div className="social-container">
-          <button
+          {/* <button
             type="button"
             className="btn btn--outline"
             onClick={handleGoogleLogin}
@@ -34,7 +34,7 @@ const AuthMethods = ({
               <Image src="/discord.png" alt="Discord logo" fill={true}></Image>
             </div>
             <span className="btn__label">Discord</span>
-          </button>
+          </button> */}
           {/* <button type="button" className="btn btn--outline">
             <div className="btn__icon">
               <Image src="/apple.png" alt="Apple logo" fill={true}></Image>
@@ -86,7 +86,7 @@ const AuthMethods = ({
           </div>
           <span className="btn__label">Continue with phone</span>
         </button>
-        <button
+        {/* <button
           type="button"
           className="btn btn--outline"
           onClick={() => setView('wallet')}
@@ -107,7 +107,7 @@ const AuthMethods = ({
             </svg>
           </div>
           <span className="btn__label">Connect your web3 wallet</span>
-        </button>
+        </button> */}
         <button
           type="button"
           className="btn btn--outline"

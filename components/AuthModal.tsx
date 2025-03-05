@@ -1,7 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import useAuthenticate from '../hooks/useAuthenticate';
-import useSession from '../hooks/useSession';
 import useAccounts from '../hooks/useAccounts';
 import {
   ORIGIN,
@@ -19,11 +17,9 @@ import WebAuthn from './WebAuthn';
 import WalletMethods from './WalletMethods';
 import StytchOTP from './StytchOTP';
 import AuthMethods from './AuthMethods';
-import { useIsMounted } from '../hooks/useIsMounted';
 
 export default function AuthModal() {
   const [view, setView] = useState<'login' | 'signup'>('login');
-  const isMounted = useIsMounted();
 
   // ---------- Login View ----------
 
@@ -38,6 +34,7 @@ export default function AuthModal() {
       loading: authLoading,
       error: authError,
     } = useAuthenticate(redirectUri);
+
     const {
       fetchAccounts,
       setCurrentAccount,
@@ -45,17 +42,9 @@ export default function AuthModal() {
       accounts,
       loading: accountsLoading,
       error: accountsError,
-      flow,
     } = useAccounts('login');
-    const {
-      initSession,
-      sessionSigs,
-      loading: sessionLoading,
-      error: sessionError,
-    } = useSession();
-    const router = useRouter();
 
-    const error = authError || accountsError || sessionError;
+    const error = authError || accountsError;
 
     async function handleGoogleLogin() {
       await signInWithGoogle(redirectUri);
@@ -71,17 +60,10 @@ export default function AuthModal() {
 
     useEffect(() => {
       // If user is authenticated, fetch accounts
-      if (authMethod && isMounted) {
+      if (authMethod) {
         fetchAccounts(authMethod);
       }
-    }, [authMethod, fetchAccounts, isMounted]);
-
-    useEffect(() => {
-      // If user is authenticated and has selected an account, initialize session
-      if (authMethod && currentAccount && isMounted) {
-        initSession(authMethod, currentAccount);
-      }
-    }, [authMethod, currentAccount, initSession, isMounted]);
+    }, [authMethod, fetchAccounts]);
 
     if (authLoading) {
       return (
@@ -93,14 +75,10 @@ export default function AuthModal() {
       return <Loading copy={'Looking up your accounts...'} error={error} />;
     }
 
-    if (sessionLoading) {
-      return <Loading copy={'Securing your session...'} error={error} />;
-    }
-
     // If user is authenticated and has selected an account, initialize session
-    if (currentAccount && sessionSigs) {
+    if (currentAccount && authMethod) {
       return (
-        <Dashboard currentAccount={currentAccount} sessionSigs={sessionSigs} />
+        <Dashboard currentAccount={currentAccount} authMethod={authMethod} />
       );
     }
 
@@ -232,23 +210,16 @@ export default function AuthModal() {
       loading: authLoading,
       error: authError,
     } = useAuthenticate(redirectUri);
+
     const {
       createAccount,
       setCurrentAccount,
       currentAccount,
       loading: accountsLoading,
       error: accountsError,
-      flow,
     } = useAccounts('signup');
-    const {
-      initSession,
-      sessionSigs,
-      loading: sessionLoading,
-      error: sessionError,
-    } = useSession();
-    const router = useRouter();
 
-    const error = authError || accountsError || sessionError;
+    const error = authError || accountsError;
 
     if (error) {
       if (authError) {
@@ -257,10 +228,6 @@ export default function AuthModal() {
 
       if (accountsError) {
         console.error('Accounts error:', accountsError);
-      }
-
-      if (sessionError) {
-        console.error('Session error:', sessionError);
       }
     }
 
@@ -284,19 +251,11 @@ export default function AuthModal() {
       // For WebAuthn, the account creation is handled by the registerWithWebAuthn function
       if (
         authMethod &&
-        authMethod.authMethodType !== AUTH_METHOD_TYPE.WebAuthn &&
-        isMounted
+        authMethod.authMethodType !== AUTH_METHOD_TYPE.WebAuthn
       ) {
         createAccount(authMethod);
       }
-    }, [authMethod, createAccount, isMounted]);
-
-    useEffect(() => {
-      // If user is authenticated and has at least one account, initialize session
-      if (authMethod && currentAccount && isMounted) {
-        initSession(authMethod, currentAccount);
-      }
-    }, [authMethod, currentAccount, initSession, isMounted]);
+    }, [authMethod, createAccount]);
 
     if (authLoading) {
       return (
@@ -308,13 +267,9 @@ export default function AuthModal() {
       return <Loading copy={'Creating your account...'} error={error} />;
     }
 
-    if (sessionLoading) {
-      return <Loading copy={'Securing your session...'} error={error} />;
-    }
-
-    if (currentAccount && sessionSigs) {
+    if (currentAccount && authMethod) {
       return (
-        <Dashboard currentAccount={currentAccount} sessionSigs={sessionSigs} />
+        <Dashboard currentAccount={currentAccount} authMethod={authMethod} />
       );
     }
 

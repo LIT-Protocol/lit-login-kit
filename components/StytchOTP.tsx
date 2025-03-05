@@ -36,7 +36,6 @@ const StytchOTP = ({ method, authWithStytch, setView }: StytchOTPProps) => {
           !userId.startsWith('+') ? `+${userId}` : userId
         );
       }
-      console.log(response);
       setMethodId(response.method_id);
       setStep('verify');
     } catch (err) {

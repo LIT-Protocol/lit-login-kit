@@ -1,5 +1,4 @@
 import { useConnect, type Connector } from 'wagmi';
-import { useIsMounted } from '../hooks/useIsMounted';
 import Image from 'next/image';
 
 interface WalletMethodsProps {
@@ -8,10 +7,7 @@ interface WalletMethodsProps {
 }
 
 const WalletMethods = ({ authWithEthWallet, setView }: WalletMethodsProps) => {
-  const isMounted = useIsMounted();
   const { connectors } = useConnect();
-
-  if (!isMounted) return null;
 
   return (
     <>

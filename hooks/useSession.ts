@@ -27,9 +27,10 @@ export default function useSession() {
             ability: LIT_ABILITY.PKPSigning,
           },
         ];
+
         const expiration = new Date(
-          Date.now() + 1000 * 60 * 60 * 24 * 7
-        ).toISOString(); // 1 week
+          Date.now() + 1000 * 60 * 60 * 1
+        ).toISOString(); // 1 hour
 
         // Generate session sigs
         const sessionSigs = await getSessionSigs({
@@ -42,7 +43,6 @@ export default function useSession() {
             resourceAbilityRequests: resourceAbilities,
           },
         });
-
         setSessionSigs(sessionSigs);
       } catch (err) {
         setError(err);
@@ -53,8 +53,14 @@ export default function useSession() {
     []
   );
 
+  const clearSession = useCallback(() => {
+    setSessionSigs(undefined);
+    setError(undefined);
+  }, []);
+
   return {
     initSession,
+    clearSession,
     sessionSigs,
     loading,
     error,

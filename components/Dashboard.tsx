@@ -1,19 +1,20 @@
-import { IRelayPKP, SessionSigs } from '@lit-protocol/types';
+import { AuthMethod, IRelayPKP, SessionSigs } from '@lit-protocol/types';
 import { ethers } from 'ethers';
 import { useState } from 'react';
 import { PKPEthersWallet } from '@lit-protocol/pkp-ethers';
 import { useRouter } from 'next/navigation';
 import { useDisconnect } from 'wagmi';
 import { litNodeClient } from '../utils/lit';
+import useSession from '../hooks/useSession';
 
 interface DashboardProps {
   currentAccount: IRelayPKP;
-  sessionSigs: SessionSigs;
+  authMethod: AuthMethod;
 }
 
 export default function Dashboard({
   currentAccount,
-  sessionSigs,
+  authMethod,
 }: DashboardProps) {
   const [message, setMessage] = useState<string>('Free the web!');
   const [signature, setSignature] = useState<string>();
@@ -25,6 +26,12 @@ export default function Dashboard({
   const { disconnectAsync } = useDisconnect();
   const router = useRouter();
 
+  const {
+    initSession,
+    sessionSigs,
+    loading: sessionLoading,
+    error: sessionError,
+  } = useSession();
   /**
    * Sign a message with current PKP
    */
@@ -33,6 +40,10 @@ export default function Dashboard({
 
     try {
       await litNodeClient.connect();
+
+      if (!sessionSigs) {
+        await initSession(authMethod, currentAccount);
+      }
 
       const pkpWallet = new PKPEthersWallet({
         controllerSessionSigs: sessionSigs,
@@ -66,7 +77,7 @@ export default function Dashboard({
       await disconnectAsync();
       router.push('/');
       router.refresh();
-    } catch (err) { }
+    } catch (err) {}
     localStorage.removeItem('lit-wallet-sig');
     router.refresh();
   }
@@ -89,8 +100,9 @@ export default function Dashboard({
         <button
           onClick={signMessageWithPKP}
           disabled={loading}
-          className={`btn ${signature ? (verified ? 'btn--success' : 'btn--error') : ''
-            } ${loading && 'btn--loading'}`}
+          className={`btn ${
+            signature ? (verified ? 'btn--success' : 'btn--error') : ''
+          } ${loading && 'btn--loading'}`}
         >
           {signature ? (
             verified ? (

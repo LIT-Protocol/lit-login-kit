@@ -1,12 +1,22 @@
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useState, useEffect, Dispatch, SetStateAction } from 'react';
 import { AuthMethod } from '@lit-protocol/types';
 import { getPKPs, mintPKP } from '../utils/lit';
 import { IRelayPKP } from '@lit-protocol/types';
-import { verify } from 'crypto';
 
 type FlowType = 'login' | 'signup';
 
-export default function useAccounts(flow: FlowType = 'login') {
+interface AccountHookReturn {
+  fetchAccounts: (authMethod: AuthMethod) => Promise<void>;
+  createAccount: (authMethod: AuthMethod) => Promise<void>;
+  setCurrentAccount: Dispatch<SetStateAction<IRelayPKP | undefined>>;
+  accounts: IRelayPKP[];
+  currentAccount: IRelayPKP | undefined;
+  loading: boolean;
+  error: Error | undefined;
+  flow: FlowType;
+}
+
+export default function useAccounts(flow: FlowType = 'login'): AccountHookReturn {
   const [accounts, setAccounts] = useState<IRelayPKP[]>([]);
   const [currentAccount, setCurrentAccount] = useState<IRelayPKP>();
   const [loading, setLoading] = useState<boolean>(false);
@@ -24,7 +34,6 @@ export default function useAccounts(flow: FlowType = 'login') {
    */
   const fetchAccounts = useCallback(
     async (authMethod: AuthMethod): Promise<void> => {
-      // Don't fetch accounts in signup flow
       if (flow === 'signup') {
         return;
       }
@@ -32,16 +41,14 @@ export default function useAccounts(flow: FlowType = 'login') {
       setLoading(true);
       setError(undefined);
       try {
-        // Fetch PKPs tied to given auth method
         const myPKPs = await getPKPs(authMethod);
-        // console.log('fetchAccounts pkps: ', myPKPs);
         setAccounts(myPKPs);
-        // If only one PKP, set as current account
         if (myPKPs.length === 1) {
           setCurrentAccount(myPKPs[0]);
         }
       } catch (err) {
-        setError(err);
+        console.error('Error fetching accounts:', err);
+        setError(err instanceof Error ? err : new Error(String(err)));
       } finally {
         setLoading(false);
       }
@@ -58,12 +65,14 @@ export default function useAccounts(flow: FlowType = 'login') {
       setError(undefined);
       try {
         const newPKP = await mintPKP(authMethod);
-
-        // console.log('createAccount pkp: ', newPKP);
-        setAccounts(prev => [...prev, newPKP]);
+        setAccounts(prev => {
+          const updated = [...prev, newPKP];
+          return updated;
+        });
         setCurrentAccount(newPKP);
       } catch (err) {
-        setError(err);
+        console.error('Error creating account:', err);
+        setError(err instanceof Error ? err : new Error(String(err)));
       } finally {
         setLoading(false);
       }
