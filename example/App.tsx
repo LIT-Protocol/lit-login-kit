@@ -1,6 +1,6 @@
 import React from 'react'
-// import { ConnectButton } from '../src'
-import { ConnectButton } from '@test/lit-login-kit'
+import { ConnectButton } from '../src'
+// import { ConnectButton } from '@test/lit-login-kit'
 
 function App() {
   return (

@@ -44,7 +44,18 @@ export default defineConfig({
       outDir: 'dist',
       insertTypesEntry: true,
       staticImport: true,
-      copyDtsFiles: true
+      copyDtsFiles: true,
+      beforeWriteFile: (filePath, content) => ({
+        filePath: filePath.replace('/src/', '/'),
+        content
+      }),
+      compilerOptions: {
+        declaration: true,
+        declarationDir: 'dist',
+        emitDeclarationOnly: true,
+        allowJs: true,
+        esModuleInterop: true
+      }
     })
   ],
   build: {
