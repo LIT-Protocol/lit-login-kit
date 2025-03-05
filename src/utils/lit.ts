@@ -24,14 +24,14 @@ import {
 } from '@lit-protocol/types';
 import { LitPKPResource } from '@lit-protocol/auth-helpers';
 
-export const DOMAIN = process.env.NEXT_PUBLIC_DOMAIN || 'localhost';
+export const DOMAIN = import.meta.env.VITE_PUBLIC_DOMAIN || 'localhost';
 export const ORIGIN =
-  process.env.NEXT_PUBLIC_VERCEL_ENV === 'production'
+  import.meta.env.VITE_VERCEL_ENV === 'production'
     ? `https://${DOMAIN}`
     : `http://${DOMAIN}:3000`;
 
-export const SELECTED_LIT_NETWORK = ((process.env
-  .NEXT_PUBLIC_LIT_NETWORK as string) ||
+export const SELECTED_LIT_NETWORK = ((import.meta.env
+  .VITE_LIT_NETWORK as string) ||
   LIT_NETWORK.DatilDev) as LIT_NETWORKS_KEYS;
 
 export const litNodeClient: LitNodeClient = new LitNodeClient({
@@ -118,7 +118,7 @@ function getWebAuthnProvider() {
   return webAuthnProvider;
 }
 function getStytchEmailOtpProvider() {
-  if (!process.env.NEXT_PUBLIC_STYTCH_PROJECT_ID) {
+  if (!import.meta.env.VITE_STYTCH_PROJECT_ID) {
     throw new Error('Stytch project ID is not set');
   }
   if (!stytchEmailOtpProvider) {
@@ -127,7 +127,7 @@ function getStytchEmailOtpProvider() {
         relay: litRelay,
         litNodeClient,
       },
-      { appId: process.env.NEXT_PUBLIC_STYTCH_PROJECT_ID},
+      { appId: import.meta.env.VITE_STYTCH_PROJECT_ID},
       'email',
     );
   }
@@ -141,7 +141,7 @@ function getStytchSmsOtpProvider() {
         relay: litRelay,
         litNodeClient,
       },
-      { appId: process.env.NEXT_PUBLIC_STYTCH_PROJECT_ID || '' },
+      { appId: import.meta.env.VITE_STYTCH_PROJECT_ID || '' },
       'sms',
     );
   }

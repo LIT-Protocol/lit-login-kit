@@ -3,7 +3,7 @@ import AuthModal from './AuthModal';
 import useSession from '../hooks/useSession';
 import useAccounts from '../hooks/useAccounts';
 import '../styles/lit-login-modal.css';
-import { useRouter } from 'next/navigation';
+import "../styles/layout.css";
 import { useDisconnect } from 'wagmi';
 
 export default function ConnectButton() {
@@ -14,10 +14,8 @@ export default function ConnectButton() {
   const { currentAccount, setCurrentAccount } = useAccounts('login');
 
   const { disconnectAsync } = useDisconnect();
-  const router = useRouter();
 
   useEffect(() => {
-    console.log('connect button says currentAccount changed', currentAccount);
     // When currentAccount changes, ensure modals are closed
     if (currentAccount) {
       setIsModalOpen(false);
@@ -40,7 +38,6 @@ export default function ConnectButton() {
     await disconnectAsync();
     setCurrentAccount(undefined);
     setIsLogoutModalOpen(false);
-    router.refresh();
   };
 
   const handleCopyAddress = () => {

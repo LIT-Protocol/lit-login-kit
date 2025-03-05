@@ -6,7 +6,7 @@ type WebAuthnStep = 'register' | 'authenticate';
 interface WebAuthnProps {
   start: WebAuthnStep;
   authWithWebAuthn: any;
-  setView: React.Dispatch<React.SetStateAction<string>>;
+  setView: React.Dispatch<React.SetStateAction<'default' | 'email' | 'phone' | 'wallet' | 'webauthn'>>;
   registerWithWebAuthn?: any;
 }
 
@@ -26,7 +26,7 @@ export default function WebAuthn({
     try {
       await registerWithWebAuthn();
       setStep('authenticate');
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
       setError(err);
     }

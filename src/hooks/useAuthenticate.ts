@@ -37,7 +37,7 @@ export default function useAuthenticate(redirectUri?: string) {
       )) as any;
       setAuthMethod(result);
     } catch (err) {
-      setError(err);
+      setError(err as Error);
     } finally {
       setLoading(false);
     }
@@ -57,7 +57,7 @@ export default function useAuthenticate(redirectUri?: string) {
       )) as any;
       setAuthMethod(result);
     } catch (err) {
-      setError(err);
+      setError(err as Error);
     } finally {
       setLoading(false);
     }
@@ -90,7 +90,7 @@ export default function useAuthenticate(redirectUri?: string) {
         );
         setAuthMethod(result);
       } catch (err) {
-        setError(err);
+        setError(err as Error);
       } finally {
         setLoading(false);
       }
@@ -111,7 +111,7 @@ export default function useAuthenticate(redirectUri?: string) {
         const result: AuthMethod = await authenticateWithWebAuthn();
         setAuthMethod(result);
       } catch (err) {
-        setError(err);
+        setError(err as Error);
       } finally {
         setLoading(false);
       }
@@ -136,7 +136,7 @@ export default function useAuthenticate(redirectUri?: string) {
         )) as any;
         setAuthMethod(result);
       } catch (err) {
-        setError(err);
+        setError(err as Error);
       } finally {
         setLoading(false);
       }

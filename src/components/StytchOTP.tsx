@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { useStytch } from '@stytch/nextjs';
+import { useStytch } from '@stytch/react';
 
 interface StytchOTPProps {
   method: OtpMethod;
   authWithStytch: any;
-  setView: React.Dispatch<React.SetStateAction<string>>;
+  setView: React.Dispatch<React.SetStateAction<'default' | 'email' | 'phone' | 'wallet' | 'webauthn'>>;
 }
 
 type OtpMethod = 'email' | 'phone';
@@ -38,7 +38,7 @@ const StytchOTP = ({ method, authWithStytch, setView }: StytchOTPProps) => {
       }
       setMethodId(response.method_id);
       setStep('verify');
-    } catch (err) {
+    } catch (err: any) {
       setError(err);
     } finally {
       setLoading(false);
@@ -54,7 +54,7 @@ const StytchOTP = ({ method, authWithStytch, setView }: StytchOTPProps) => {
         session_duration_minutes: 60,
       });
       await authWithStytch(response.session_jwt, response.user_id, method);
-    } catch (err) {
+    } catch (err: any) {
       setError(err);
     } finally {
       setLoading(false);

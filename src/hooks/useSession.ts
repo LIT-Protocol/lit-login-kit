@@ -36,7 +36,8 @@ export default function useSession() {
         const sessionSigs = await getSessionSigs({
           pkpPublicKey: pkp.publicKey,
           authMethod,
-          //@ts-ignore
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
           sessionSigsParams: {
             chain,
             expiration,
@@ -45,7 +46,7 @@ export default function useSession() {
         });
         setSessionSigs(sessionSigs);
       } catch (err) {
-        setError(err);
+        setError(err as Error);
       } finally {
         setLoading(false);
       }

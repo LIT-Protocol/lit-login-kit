@@ -1,9 +1,7 @@
-import Image from 'next/image';
-
 interface AuthMethodsProps {
   handleGoogleLogin: () => Promise<void>;
   handleDiscordLogin: () => Promise<void>;
-  setView: React.Dispatch<React.SetStateAction<string>>;
+  setView: React.Dispatch<React.SetStateAction<'default' | 'email' | 'phone' | 'wallet' | 'webauthn'>>;
 }
 
 const AuthMethods = ({

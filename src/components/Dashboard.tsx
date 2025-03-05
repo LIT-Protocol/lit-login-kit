@@ -2,7 +2,6 @@ import { AuthMethod, IRelayPKP, SessionSigs } from '@lit-protocol/types';
 import { ethers } from 'ethers';
 import { useState } from 'react';
 import { PKPEthersWallet } from '@lit-protocol/pkp-ethers';
-import { useRouter } from 'next/navigation';
 import { useDisconnect } from 'wagmi';
 import { litNodeClient } from '../utils/lit';
 import useSession from '../hooks/useSession';
@@ -24,7 +23,6 @@ export default function Dashboard({
   const [error, setError] = useState<Error>();
 
   const { disconnectAsync } = useDisconnect();
-  const router = useRouter();
 
   const {
     initSession,
@@ -66,7 +64,7 @@ export default function Dashboard({
       setVerified(verified);
     } catch (err) {
       console.error(err);
-      setError(err);
+      setError(err as Error);
     }
 
     setLoading(false);
@@ -75,11 +73,10 @@ export default function Dashboard({
   async function handleLogout() {
     try {
       await disconnectAsync();
-      router.push('/');
-      router.refresh();
-    } catch (err) {}
+    } catch (err) {
+      setError(err as Error);
+    }
     localStorage.removeItem('lit-wallet-sig');
-    router.refresh();
   }
 
   return (

@@ -1,9 +1,8 @@
 import { useConnect, type Connector } from 'wagmi';
-import Image from 'next/image';
 
 interface WalletMethodsProps {
   authWithEthWallet: (connector: Connector) => Promise<void>;
-  setView: React.Dispatch<React.SetStateAction<string>>;
+  setView: React.Dispatch<React.SetStateAction<'default' | 'email' | 'phone' | 'wallet' | 'webauthn'>>;
 }
 
 const WalletMethods = ({ authWithEthWallet, setView }: WalletMethodsProps) => {
@@ -27,20 +26,20 @@ const WalletMethods = ({ authWithEthWallet, setView }: WalletMethodsProps) => {
           >
             {connector.name.toLowerCase() === 'metamask' && (
               <div className="btn__icon">
-                <Image
+                <img
                   src="/metamask.png"
                   alt="MetaMask logo"
-                  fill={true}
-                ></Image>
+                  // fill={true}
+                ></img>
               </div>
             )}
             {connector.name.toLowerCase() === 'coinbase wallet' && (
               <div className="btn__icon">
-                <Image
+                <img
                   src="/coinbase.png"
                   alt="Coinbase logo"
-                  fill={true}
-                ></Image>
+                  // fill={true}
+                ></img>
               </div>
             )}
             <span className="btn__label">Continue with {connector.name}</span>

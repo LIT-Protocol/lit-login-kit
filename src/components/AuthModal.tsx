@@ -8,10 +8,10 @@ import {
   registerWebAuthn,
   SELECTED_LIT_NETWORK,
 } from '../utils/lit';
-import Dashboard from '../components/Dashboard';
-import Loading from '../components/Loading';
-import AccountSelection from '../components/AccountSelection';
-import CreateAccount from '../components/CreateAccount';
+import Dashboard from './Dashboard';
+import Loading from './Loading';
+import AccountSelection from './AccountSelection';
+import CreateAccount from './CreateAccount';
 import { AUTH_METHOD_TYPE } from '@lit-protocol/constants';
 import WebAuthn from './WebAuthn';
 import WalletMethods from './WalletMethods';
