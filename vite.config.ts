@@ -4,6 +4,7 @@ import dts from 'vite-plugin-dts';
 import { resolve } from 'path';
 import commonjs from '@rollup/plugin-commonjs';
 import nodeResolve from '@rollup/plugin-node-resolve';
+import { ModuleResolutionKind, ScriptTarget, JsxEmit, ModuleKind } from 'typescript';
 
 export default defineConfig({
   define: {
@@ -54,7 +55,19 @@ export default defineConfig({
         declarationDir: 'dist',
         emitDeclarationOnly: true,
         allowJs: true,
-        esModuleInterop: true
+        esModuleInterop: true,
+        skipLibCheck: true,
+        moduleResolution: ModuleResolutionKind.NodeJs,
+        target: ScriptTarget.ES2020,
+        lib: ["ES2020", "DOM", "DOM.Iterable"],
+        jsx: JsxEmit.ReactJSX,
+        module: ModuleKind.ESNext,
+        resolveJsonModule: true,
+        isolatedModules: true,
+        baseUrl: ".",
+        paths: {
+          "*": ["node_modules/*"]
+        }
       }
     })
   ],
@@ -62,7 +75,7 @@ export default defineConfig({
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
       name: 'lit-login-kit',
-      fileName: () => 'index.js',
+      fileName: (format) => `index.${format}.js`,
       formats: ['es']
     },
     rollupOptions: {
@@ -117,6 +130,7 @@ export default defineConfig({
     sourcemap: true,
     minify: false,
     target: 'esnext',
-    cssCodeSplit: true
+    cssCodeSplit: true,
+    emptyOutDir: true
   }
 });

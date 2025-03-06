@@ -1,6 +1,6 @@
 import React from "react";
-import { LitConnectButton } from "../src";
-// import { ConnectButton } from '@test/lit-login-kit'
+// import { LitConnectButton } from "../src";
+import { LitConnectButton } from '@test/lit-login-kit'
 
 function App() {
     return (
