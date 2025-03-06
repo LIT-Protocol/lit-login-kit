@@ -2,6 +2,7 @@ import { useCallback, useState, useEffect, Dispatch, SetStateAction } from 'reac
 import { AuthMethod } from '@lit-protocol/types';
 import { getPKPs, mintPKP } from '../utils/lit';
 import { IRelayPKP } from '@lit-protocol/types';
+import { useSessionStorage } from './useSessionStorage';
 
 type FlowType = 'login' | 'signup';
 
@@ -25,21 +26,20 @@ interface AccountHookReturn {
   flow: FlowType;
 }
 
-export default function useAccounts(flow: FlowType = 'login'): AccountHookReturn {
+export default function useAccounts(flow: FlowType): AccountHookReturn {
   const [accounts, setAccounts] = useState<IRelayPKP[]>(sharedAccounts);
   const [currentAccount, setCurrentAccount] = useState<IRelayPKP | undefined>(sharedCurrentAccount);
   const [loading, setLoading] = useState<boolean>(sharedLoading);
   const [error, setError] = useState<Error | undefined>(sharedError);
+  const { sessionData, storeSession } = useSessionStorage();
 
-  // Reset state when flow changes
+  // Load stored session on mount
   useEffect(() => {
-    sharedAccounts = [];
-    sharedCurrentAccount = undefined;
-    sharedError = undefined;
-    setAccounts([]);
-    setCurrentAccount(undefined);
-    setError(undefined);
-  }, [flow]);
+    if (sessionData.pkp) {
+      sharedCurrentAccount = sessionData.pkp;
+      setCurrentAccount(sessionData.pkp);
+    }
+  }, [sessionData]);
 
   // Add listener when component mounts
   useEffect(() => {
@@ -68,11 +68,13 @@ export default function useAccounts(flow: FlowType = 'login'): AccountHookReturn
       setError(undefined);
       try {
         const myPKPs = await getPKPs(authMethod);
+        console.log('Fetched PKPs:', myPKPs);
         sharedAccounts = myPKPs;
         setAccounts(myPKPs);
         if (myPKPs.length === 1) {
           sharedCurrentAccount = myPKPs[0];
           setCurrentAccount(myPKPs[0]);
+          storeSession(authMethod, myPKPs[0]);
           // Notify all listeners
           listeners.forEach(listener => listener(myPKPs[0]));
         }
@@ -85,7 +87,7 @@ export default function useAccounts(flow: FlowType = 'login'): AccountHookReturn
         setLoading(false);
       }
     },
-    [flow]
+    [flow, storeSession]
   );
 
   /**
@@ -105,6 +107,7 @@ export default function useAccounts(flow: FlowType = 'login'): AccountHookReturn
         const newPKP = await mintPKP(authMethod);
         sharedCurrentAccount = newPKP;
         setCurrentAccount(newPKP);
+        storeSession(authMethod, newPKP);
         // Notify all listeners
         listeners.forEach(listener => listener(newPKP));
       } catch (err) {
@@ -116,7 +119,7 @@ export default function useAccounts(flow: FlowType = 'login'): AccountHookReturn
         setLoading(false);
       }
     },
-    [flow]
+    [flow, storeSession]
   );
 
   // Custom setCurrentAccount that updates both local and shared state

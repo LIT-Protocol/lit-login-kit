@@ -88,6 +88,7 @@ export default function AuthModal() {
         <AccountSelection
           accounts={accounts}
           setCurrentAccount={setCurrentAccount}
+          authMethod={authMethod}
           error={error}
         />
       );

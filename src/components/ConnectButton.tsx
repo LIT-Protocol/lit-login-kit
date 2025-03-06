@@ -5,13 +5,15 @@ import useAccounts from '../hooks/useAccounts';
 import '../styles/lit-login-modal.css';
 import "../styles/layout.css";
 import { useDisconnect } from 'wagmi';
+import { useSessionStorage } from '../hooks/useSessionStorage';
 
 export default function ConnectButton() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
-  const { clearSession } = useSession();
+  const { clearSession: clearLitSession } = useSession();
   const { currentAccount, setCurrentAccount } = useAccounts('login');
+  const { sessionData, clearSession } = useSessionStorage();
 
   const { disconnectAsync } = useDisconnect();
 
@@ -34,6 +36,7 @@ export default function ConnectButton() {
   };
 
   const handleLogout = async () => {
+    clearLitSession();
     clearSession();
     await disconnectAsync();
     setCurrentAccount(undefined);

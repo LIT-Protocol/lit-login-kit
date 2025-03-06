@@ -357,3 +357,64 @@ export async function mintPKP(authMethod: AuthMethod): Promise<IRelayPKP> {
 
   return newPKP;
 }
+
+// Session storage keys
+const SESSION_STORAGE_KEYS = {
+  AUTH_METHOD: 'lit-auth-method',
+  PKP: 'lit-pkp',
+  ACTIVE: 'lit-session-active'
+};
+
+/**
+ * Store the current session data in local storage
+ */
+export function storeSession(authMethod: AuthMethod, pkp: IRelayPKP) {
+  console.log('Storing session:', { authMethod, pkp });
+  localStorage.setItem(SESSION_STORAGE_KEYS.AUTH_METHOD, JSON.stringify(authMethod));
+  localStorage.setItem(SESSION_STORAGE_KEYS.PKP, JSON.stringify(pkp));
+  localStorage.setItem(SESSION_STORAGE_KEYS.ACTIVE, 'true');
+  console.log('Session stored');
+}
+
+/**
+ * Clear the stored session data
+ */
+export function clearSession() {
+  console.log('Clearing session...', new Error().stack);
+  localStorage.removeItem(SESSION_STORAGE_KEYS.AUTH_METHOD);
+  localStorage.removeItem(SESSION_STORAGE_KEYS.PKP);
+  localStorage.removeItem(SESSION_STORAGE_KEYS.ACTIVE);
+}
+
+/**
+ * Get the stored session data if it exists
+ */
+export function getStoredSession(): { authMethod: AuthMethod; pkp: IRelayPKP } | null {
+  const storedAuthMethod = localStorage.getItem(SESSION_STORAGE_KEYS.AUTH_METHOD);
+  const storedPKP = localStorage.getItem(SESSION_STORAGE_KEYS.PKP);
+  const isActive = localStorage.getItem(SESSION_STORAGE_KEYS.ACTIVE);
+
+  console.log('Retrieved session from storage:', { storedAuthMethod, storedPKP, isActive });
+
+  if (!storedAuthMethod || !storedPKP || !isActive) {
+    return null;
+  }
+
+  try {
+    return {
+      authMethod: JSON.parse(storedAuthMethod),
+      pkp: JSON.parse(storedPKP)
+    };
+  } catch (err) {
+    console.error('Failed to parse stored session:', err);
+    clearSession();
+    return null;
+  }
+}
+
+/**
+ * Check if there is an active session
+ */
+export function hasActiveSession(): boolean {
+  return localStorage.getItem(SESSION_STORAGE_KEYS.ACTIVE) === 'true';
+}

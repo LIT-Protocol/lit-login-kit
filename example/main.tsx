@@ -7,7 +7,7 @@ import { StytchProvider } from "@stytch/react";
 import { StytchUIClient } from "@stytch/vanilla-js";
 import { config, queryClient } from "./wagmi";
 
-const stytchPublicToken =  import.meta.env.VITE_STYTCH_PUBLIC_TOKEN
+const stytchPublicToken = import.meta.env.VITE_STYTCH_PUBLIC_TOKEN
 
 const client = new StytchUIClient(stytchPublicToken);
 
