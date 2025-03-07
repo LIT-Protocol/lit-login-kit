@@ -2,22 +2,21 @@
     "name": "@test/lit-login-kit",
     "version": "0.0.1",
     "type": "module",
-    "files": [
-        "dist"
-    ],
-    "main": "./dist/index.mjs",
+    "files": ["dist"],
+    "main": "./dist/index.cjs",
     "module": "./dist/index.mjs",
     "types": "./dist/index.d.ts",
     "exports": {
         ".": {
             "types": "./dist/index.d.ts",
-            "import": "./dist/index.mjs"
+            "import": "./dist/index.mjs",
+            "require": "./dist/index.cjs"
         }
     },
     "sideEffects": false,
     "scripts": {
         "dev": "vite",
-        "build": "vite build",
+        "build": "rm -rf dist && vite build",
         "preview": "vite preview",
         "test": "npm run build && npm run dev"
     },

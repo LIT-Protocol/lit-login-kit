@@ -21,9 +21,9 @@ export default defineConfig({
     build: {
         lib: {
             entry: path.resolve(__dirname, "src/index.ts"),
-            name: "lit-login-kit",
-            formats: ["es"],
-            fileName: (format) => `index.mjs`,
+            name: "@test/lit-login-kit",
+            formats: ["es", "cjs"],
+            fileName: (format) => `index.${format === "es" ? "mjs" : "cjs"}`,
         },
         rollupOptions: {
             external: [
