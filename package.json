@@ -5,16 +5,16 @@
     "files": [
         "dist"
     ],
-    "main": "dist/index.js",
-    "module": "dist/index.mjs",
-    "types": "dist/index.d.ts",
+    "main": "./dist/index.mjs",
+    "module": "./dist/index.mjs",
+    "types": "./dist/index.d.ts",
     "exports": {
         ".": {
             "types": "./dist/index.d.ts",
-            "require": "./dist/index.js",
             "import": "./dist/index.mjs"
         }
     },
+    "sideEffects": false,
     "scripts": {
         "dev": "vite",
         "build": "vite build",
@@ -33,18 +33,8 @@
         "@simplewebauthn/browser": "^13.1.0",
         "@stytch/react": "^19.4.0",
         "@stytch/vanilla-js": "^5.18.0",
-        "assert": "^2.1.0",
-        "buffer": "^6.0.3",
-        "crypto-browserify": "^3.12.1",
         "ethers": "^5.8.0",
-        "https-browserify": "^1.0.0",
-        "os-browserify": "^0.3.0",
-        "path": "^0.12.7",
-        "process": "^0.11.10",
-        "react-router-dom": "^7.2.0",
-        "stream-browserify": "^3.0.0",
-        "stream-http": "^3.2.0",
-        "url": "^0.11.4",
+        "assert": "^2.1.0",
         "wagmi": "^2.14.12"
     },
     "devDependencies": {
