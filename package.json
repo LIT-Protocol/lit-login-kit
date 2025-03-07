@@ -1,70 +1,56 @@
 {
-  "name": "@test/lit-login-kit",
-  "version": "0.0.1",
-  "type": "module",
-  "files": [
-    "dist"
-  ],
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+    "name": "@test/lit-login-kit",
+    "version": "0.0.1",
+    "type": "module",
+    "files": ["dist"],
+    "main": "./dist/index.cjs",
+    "module": "./dist/index.mjs",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.mjs",
+            "require": "./dist/index.cjs"
+        }
     },
-    "./types": {
-      "import": "./dist/types.js",
-      "types": "./dist/types.d.ts"
+    "sideEffects": false,
+    "scripts": {
+        "dev": "vite",
+        "build": "rm -rf dist && tsc && vite build",
+        "preview": "vite preview",
+        "test": "npm run build && npm run dev"
+    },
+    "peerDependencies": {
+        "react": "^18.0.0",
+        "react-dom": "^18.0.0"
+    },
+    "dependencies": {
+        "@lit-protocol/lit-auth-client": "^7.0.7",
+        "@lit-protocol/lit-node-client": "^7.0.7",
+        "@lit-protocol/pkp-ethers": "^7.0.7",
+        "@radix-ui/react-radio-group": "^1.2.3",
+        "@simplewebauthn/browser": "^13.1.0",
+        "@stytch/react": "^19.4.0",
+        "@stytch/vanilla-js": "^5.18.0",
+        "ethers": "^5.8.0",
+        "assert": "^2.1.0",
+        "wagmi": "^2.14.12"
+    },
+    "devDependencies": {
+        "@eslint/js": "^9.21.0",
+        "@rollup/plugin-terser": "^0.4.4",
+        "@types/node": "^22.13.9",
+        "@types/react": "^19.0.10",
+        "@types/react-dom": "^19.0.4",
+        "@vitejs/plugin-react": "^4.3.4",
+        "eslint": "^9.21.0",
+        "eslint-plugin-react-hooks": "^5.1.0",
+        "eslint-plugin-react-refresh": "^0.4.19",
+        "globals": "^15.15.0",
+        "typescript": "~5.7.2",
+        "typescript-eslint": "^8.24.1",
+        "vite": "^6.2.1",
+        "vite-plugin-css-injected-by-js": "^3.5.2",
+        "vite-plugin-dts": "^4.5.3"
     }
-  },
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc -p tsconfig.build.json && vite build",
-    "preview": "vite preview",
-    "test": "npm run build && npm run dev"
-  },
-  "peerDependencies": {
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0"
-  },
-  "dependencies": {
-    "@lit-protocol/lit-auth-client": "^7.0.7",
-    "@lit-protocol/lit-node-client": "^7.0.7",
-    "@lit-protocol/pkp-ethers": "^7.0.7",
-    "@radix-ui/react-radio-group": "^1.2.3",
-    "@rollup/plugin-commonjs": "^28.0.2",
-    "@rollup/plugin-node-resolve": "^16.0.0",
-    "@simplewebauthn/browser": "^13.1.0",
-    "@stytch/react": "^19.4.0",
-    "@stytch/vanilla-js": "^5.18.0",
-    "assert": "^2.1.0",
-    "buffer": "^6.0.3",
-    "crypto-browserify": "^3.12.1",
-    "ethers": "^5.8.0",
-    "https-browserify": "^1.0.0",
-    "os-browserify": "^0.3.0",
-    "path": "^0.12.7",
-    "process": "^0.11.10",
-    "react-router-dom": "^7.2.0",
-    "stream-browserify": "^3.0.0",
-    "stream-http": "^3.2.0",
-    "url": "^0.11.4",
-    "vite-plugin-dts": "^4.5.3",
-    "wagmi": "^2.14.12"
-  },
-  "devDependencies": {
-    "@eslint/js": "^9.21.0",
-    "@types/node": "^22.13.9",
-    "@types/react": "^19.0.10",
-    "@types/react-dom": "^19.0.4",
-    "@vitejs/plugin-react": "^4.3.4",
-    "eslint": "^9.21.0",
-    "eslint-plugin-react-hooks": "^5.1.0",
-    "eslint-plugin-react-refresh": "^0.4.19",
-    "globals": "^15.15.0",
-    "typescript": "~5.7.2",
-    "typescript-eslint": "^8.24.1",
-    "vite": "^6.2.0"
-  }
 }
