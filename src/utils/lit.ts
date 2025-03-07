@@ -68,9 +68,14 @@ function getAuthenticatedProvider(authMethod: AuthMethod): BaseProvider {
     [AUTH_METHOD_TYPE.WebAuthn]: webAuthnProvider,
     [AUTH_METHOD_TYPE.StytchEmailFactorOtp]: stytchEmailOtpProvider,
     [AUTH_METHOD_TYPE.StytchSmsFactorOtp]: stytchSmsOtpProvider,
-  };
+  } as const;
 
-  return providers[authMethod.authMethodType];
+  const provider = providers[authMethod.authMethodType as keyof typeof providers];
+  if (!provider) {
+    throw new Error(`Provider not found for auth method type: ${authMethod.authMethodType}`);
+  }
+
+  return provider;
 }
 
 function getGoogleProvider(redirectUri: string) {
