@@ -46,13 +46,10 @@ export default defineConfig({
       insertTypesEntry: true,
       staticImport: true,
       copyDtsFiles: true,
-      beforeWriteFile: (filePath, content) => {
-        console.log('Generating types for:', filePath);
-        return {
-          filePath: filePath.replace('/src/', '/'),
-          content
-        };
-      },
+      beforeWriteFile: (filePath, content) => ({
+        filePath: filePath.replace('/src/', '/'),
+        content
+      }),
       compilerOptions: {
         declaration: true,
         declarationDir: 'dist',
@@ -70,8 +67,7 @@ export default defineConfig({
         baseUrl: ".",
         paths: {
           "*": ["node_modules/*"]
-        },
-        types: ["node", "react", "react-dom"]
+        }
       }
     })
   ],
@@ -135,7 +131,6 @@ export default defineConfig({
     minify: false,
     target: 'esnext',
     cssCodeSplit: true,
-    emptyOutDir: true,
-    reportCompressedSize: false
+    emptyOutDir: true
   }
 });
